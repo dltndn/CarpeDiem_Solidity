@@ -68,7 +68,7 @@ contract MiniLottery is Ownable, AccessControl, Initializable {
 
     fallback() payable external {
         address impl = implementation;
-        require(impl != address(0));
+        require(implementation != address(0));
         assembly {
             let ptr := mload(0x40)
             calldatacopy(ptr, 0, calldatasize())

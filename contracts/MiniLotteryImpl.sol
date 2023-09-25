@@ -104,6 +104,8 @@ contract MiniLotteryImpl is MiniLottery {
                     emit Bet(currentGameId, _betAmount, i + 1);
                 }
                 return i + 1;
+            } else if (_gameData.players[i] == msg.sender) {
+                revert("Player is already assigned.");
             }
         }
         revert("All players are already assigned.");
