@@ -21,6 +21,11 @@ contract MiniLottery is Ownable, AccessControl, Initializable {
     address payable public developerWallet; // 수수료 수취 지갑 주소
     uint public managementFee; // 개발자 수수료(베팅금에서 차감) - ex) 100 -> 1%
 
+    event Bet(uint indexed gameId, uint indexed betAmount, uint spot);
+    event EnterFirstPlayer(uint preBlockNumber , bytes32 preBlockhash, uint preWinnerSpot);
+    event ClaimReward(uint gameId, uint indexed betAmount);
+    event ChangedManagement(bool isChanged);
+
     // 게임 구조체
     struct Game {
         uint targetBlockNumber;
@@ -80,19 +85,19 @@ contract MiniLottery is Ownable, AccessControl, Initializable {
     function setImplementation(address _newImple) external onlyRole(SET_MANAGEMENT_ROLE) {
         require(_newImple != address(0));
         implementation = _newImple;
+        emit ChangedManagement(true);
     }
 
     // 수수료 수취 지갑 주소 수정
     function setfeeCollector(address _new) external onlyRole(SET_MANAGEMENT_ROLE) {
         require(_new != address(0));
         implementation = _new;
+        emit ChangedManagement(true);
     }
 
+    // 개발자 수수료 수정
     function setManagementFee(uint _fee) external onlyRole(SET_MANAGEMENT_ROLE) {
         managementFee = _fee;
+        emit ChangedManagement(true);
     }
-
-    // impl code
-
-    
 }
