@@ -87,21 +87,21 @@ contract MiniLotteryImpl is MiniLottery {
                     preGameData.winnerSpot = _winnerSpot.add(1);
                     _gameData.players[i] = msg.sender;
                     _insertGameId(currentGameId, _betAmount);
-                    emit Bet(currentGameId, _betAmount, i + 1);
-                    emit EnterFirstPlayer(preBlockNum, _targetBlockhash, _winnerSpot.add(1));
+                    emit Bet(currentGameId, _betAmount);
+                    emit EnterFirstPlayer(currentGameId, _betAmount);
                 } else if (i == 3) {
                     // 마지막 참가자 - 현재 게임 ID 1 증가
                     Counters.Counter storage currentGameIdStruct = _getGameIdStorage(_betAmount);
                     _gameData.players[i] = msg.sender;
                     _insertGameId(currentGameId, _betAmount);
                     console.log("before gameId: %d", _getGameId(_betAmount));
-                    emit Bet(currentGameId, _betAmount, i + 1);
+                    emit Bet(currentGameId, _betAmount);
                     currentGameIdStruct.increment();
                     console.log("after gameId: %d", _getGameId(_betAmount));
                 } else {
                     _gameData.players[i] = msg.sender;
                     _insertGameId(_getGameId(_betAmount), _betAmount);
-                    emit Bet(currentGameId, _betAmount, i + 1);
+                    emit Bet(currentGameId, _betAmount);
                 }
                 return i + 1;
             } else if (_gameData.players[i] == msg.sender) {
@@ -112,7 +112,7 @@ contract MiniLotteryImpl is MiniLottery {
     }
 
     // 베팅 함수 - 2, 10, 50, 250개의 이더를 전송하며 실행해야 함
-    function bet() payable external returns (uint, uint) {
+    function bet() payable external whenNotPaused returns (uint, uint) {
         require(msg.sender != address(0));
         uint gameId = _getGameId(msg.value);
         Game storage gameData = _getGameData(gameId, msg.value);        
@@ -155,7 +155,7 @@ contract MiniLotteryImpl is MiniLottery {
     }
 
     // 당첨자가 당청금을 수거하는 함수
-    function claimReward(uint _gameId, uint _betAmount) payable external returns (uint, uint) {
+    function claimReward(uint _gameId, uint _betAmount) payable external whenNotPaused returns (uint, uint) {
         require(msg.sender != address(0));
         Game storage game = isWinner(msg.sender, _gameId, _betAmount);
         // 당첨금 계산
@@ -163,11 +163,12 @@ contract MiniLotteryImpl is MiniLottery {
         payable(msg.sender).transfer(reward);
         game.rewardClaimed = true;
         emit ClaimReward(_gameId, _betAmount);
+        emit PlayerGetReward(_betAmount, msg.sender, reward);
         return (_gameId, reward);
     }
 
     // gameId 별 참가자 지갑주소 가져오기
-    function getPlayersPerGameId(uint _gameId, uint _betAmount) external view returns (address[4] memory) {
+    function getPlayersPerGameId(uint _gameId, uint _betAmount) public view returns (address[4] memory) {
         address[4] memory result;
     
         Game storage gameData;
@@ -212,5 +213,41 @@ contract MiniLotteryImpl is MiniLottery {
         game.rewardClaimed = true;
         Counters.Counter storage currentGameId = _getGameIdStorage(_betAmount);
         currentGameId.increment();
+    }
+
+    // player가 참여한 amount개 게임 id를 가장 최근 - index부터 내림차순으로 가져오기 
+    // ex) _amount = 2, _index = 3, arr = [0, 1, 2, 3, 4, 5, 6] -> [2, 3]
+    function getRecentGameIds(address _player, uint _betAmount, uint _amount, uint _index) view external returns (uint[] memory) {
+        uint[] memory ids;
+        if (_betAmount == 2 ether) {
+            ids = playerBet2GameId[_player];
+        } else if (_betAmount == 10 ether) {
+            ids = playerBet10GameId[_player];
+        } else if (_betAmount == 50 ether) {
+            ids = playerBet50GameId[_player];
+        } else if (_betAmount == 250 ether) {
+            ids = playerBet250GameId[_player];
+        } else {
+            revert("Invalid bet amount.");
+        }
+        uint startIndex;
+        uint endIndex;
+        if (ids.length <= _index) {
+            startIndex = ids.length.sub(1);
+        } else {
+            startIndex = ids.length.sub(_index + 1);
+        }
+        if (startIndex <= _amount - 1) {
+            endIndex = 0;
+        } else {
+            endIndex = startIndex.sub(_amount - 1);
+        }
+        uint[] memory result = new uint[](_amount);
+        uint resultIndex = 0;
+        for (uint i=startIndex; i>=endIndex; --i) {
+            result[resultIndex] = ids[i];
+            resultIndex++;
+        }
+        return result;
     }
 }

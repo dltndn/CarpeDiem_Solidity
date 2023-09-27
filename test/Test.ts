@@ -27,16 +27,20 @@ describe("MiniLottery contract", function () {
 
     const betFunc = 'bet()'
     const claimFunc = 'claimReward(uint256, uint256)'
+    const getRecentGameIds = 'getRecentGameIds(address, uint256, uint256, uint256)'
 
-    const MiniLotteryContractR = new ethers.Contract(
+    const MiniLotteryContractR = (sender: any) => {
+       return new ethers.Contract(
         MiniLotteryContract.target,
         [
           ...MiniLotteryContract.interface.fragments,
           `function ${betFunc}`,
           `function ${claimFunc}`,
+          `function ${getRecentGameIds}`
         ],
-        owner,
+        sender,
       );
+    }
 
     const players = [owner, addr1, addr2, addr3]
 
@@ -44,9 +48,10 @@ describe("MiniLottery contract", function () {
 
     // fallback
 
-    for (let j = 0; j<3; ++j) {
+    for (let j = 0; j<5; ++j) {
         for (let i = 0; i < players.length; ++i) {
-            const g = await MiniLotteryContractR[betFunc]({
+          const contract = MiniLotteryContractR(players[i])
+            const g = await contract[betFunc]({
                 value: betAmount
             })
             console.log("gasPrice: ", g.gasPrice)
@@ -68,9 +73,13 @@ describe("MiniLottery contract", function () {
     
     await printData()
 
-    await MiniLotteryContractR[claimFunc]("1", betAmount)
+    const claimContract = MiniLotteryContractR(owner)
+    const res = await claimContract[getRecentGameIds](addr1, betAmount, 2, 2);
 
-    await printData()
+    console.log("res: ", res)
+
+    const gamePlayers = await MiniLotteryContract.getPlayersPerGameId("1", ethers.parseEther("2"))
+    console.log("players: ", gamePlayers)
 
     
 
@@ -115,8 +124,7 @@ describe("MiniLottery contract", function () {
 
 
     
-    // const gamePlayers = await MiniLotteryContract.getPlayersPerGameId("1", ethers.parseEther("2"))
-    // console.log("players: ", gamePlayers)
+    
     // const gamePlayers2 = await MiniLotteryContract.getPlayersPerGameId("2", ethers.parseEther("2"))
     // console.log("players: ", gamePlayers2)
     // await MiniLotteryContract.claimReward("1", ethers.parseEther("2"));

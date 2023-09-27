@@ -7,11 +7,12 @@ import "../node_modules/@openzeppelin/contracts/utils/Counters.sol";
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 import "../node_modules/@openzeppelin/contracts/access/AccessControl.sol";
 import "../node_modules/@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "../node_modules/@openzeppelin/contracts/security/Pausable.sol";
 
 import "hardhat/console.sol";
 
 /// @custom:security-contact james98099@gmail.com
-contract MiniLottery is Ownable, AccessControl, Initializable {
+contract MiniLottery is Ownable, AccessControl, Initializable, Pausable {
     bytes32 public constant SET_MANAGEMENT_ROLE = keccak256("SET_MANAGEMENT_ROLE");
     using SafeMath for uint256;
     using Counters for Counters.Counter;
@@ -21,9 +22,10 @@ contract MiniLottery is Ownable, AccessControl, Initializable {
     address payable public developerWallet; // 수수료 수취 지갑 주소
     uint public managementFee; // 개발자 수수료(베팅금에서 차감) - ex) 100 -> 1%
 
-    event Bet(uint indexed gameId, uint indexed betAmount, uint spot);
-    event EnterFirstPlayer(uint preBlockNumber , bytes32 preBlockhash, uint preWinnerSpot);
-    event ClaimReward(uint gameId, uint indexed betAmount);
+    event Bet(uint indexed gameId, uint indexed betAmount);
+    event EnterFirstPlayer(uint indexed gameId, uint indexed betAmount);
+    event ClaimReward(uint indexed gameId, uint indexed betAmount);
+    event PlayerGetReward(uint indexed betAmount, address indexed player, uint value);
     event ChangedManagement(bool isChanged);
 
     // 게임 구조체
@@ -99,5 +101,15 @@ contract MiniLottery is Ownable, AccessControl, Initializable {
     function setManagementFee(uint _fee) external onlyRole(SET_MANAGEMENT_ROLE) {
         managementFee = _fee;
         emit ChangedManagement(true);
+    }
+
+    // 임시 중지 함수
+    function pause() external onlyRole(SET_MANAGEMENT_ROLE) {
+        _pause();
+    }
+
+    // 임시 중지 해제 함수
+    function unpause() external onlyRole(SET_MANAGEMENT_ROLE) {
+        _unpause();
     }
 }
