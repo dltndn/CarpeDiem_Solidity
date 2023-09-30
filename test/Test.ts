@@ -10,33 +10,37 @@ describe("MiniLottery contract", function () {
   async function deployConractFixture() {
     const [owner, addr1, addr2, addr3] = await ethers.getSigners();
 
-    const MiniLotteryContract = await ethers.deployContract("MiniLottery");
-    const MiniLotteryImplContract = await ethers.deployContract("MiniLotteryImpl");
+    const HashLotteryContract = await ethers.deployContract("HashLottery");
+    const HashiLotteryImplContract = await ethers.deployContract("HashLotteryImpl");
 
     // Fixtures can return anything you consider useful for your tests
-    return { MiniLotteryContract, MiniLotteryImplContract, owner, addr1, addr2, addr3 };
+    return { HashLotteryContract, HashiLotteryImplContract, owner, addr1, addr2, addr3 };
   }
 
   it.only("Should assign the total supply of tokens to the owner", async function () {
-    const { MiniLotteryContract, MiniLotteryImplContract, owner, addr1, addr2, addr3 } = await loadFixture(
+    const { HashLotteryContract, HashiLotteryImplContract, owner, addr1, addr2, addr3 } = await loadFixture(
       deployConractFixture
     );
 
-    await MiniLotteryContract.initialize(owner)
-    await MiniLotteryContract.setImplementation(MiniLotteryImplContract.target)
+    const betAmount = ethers.parseEther("2"); // 2 ETH
+
+    await HashLotteryContract.initialize(owner, betAmount)
+    await HashLotteryContract.setImplementation(HashiLotteryImplContract.target)
 
     const betFunc = 'bet()'
-    const claimFunc = 'claimReward(uint256, uint256)'
-    const getRecentGameIds = 'getRecentGameIds(address, uint256, uint256, uint256)'
+    const claimFunc = 'claimReward(uint256)'
+    const getRecentGameIds = 'getRecentGameIds(address, uint256, uint256)'
+    const getPlayersPerGameId = 'getPlayersPerGameId(uint256)'
 
-    const MiniLotteryContractR = (sender: any) => {
+    const HashLotteryContractR = (sender: any) => {
        return new ethers.Contract(
-        MiniLotteryContract.target,
+        HashLotteryContract.target,
         [
-          ...MiniLotteryContract.interface.fragments,
+          ...HashLotteryContract.interface.fragments,
           `function ${betFunc}`,
           `function ${claimFunc}`,
-          `function ${getRecentGameIds}`
+          `function ${getRecentGameIds}`,
+          `function ${getPlayersPerGameId}`
         ],
         sender,
       );
@@ -44,13 +48,11 @@ describe("MiniLottery contract", function () {
 
     const players = [owner, addr1, addr2, addr3]
 
-    const betAmount = ethers.parseEther("2"); // 2 ETH
-
     // fallback
 
     for (let j = 0; j<5; ++j) {
         for (let i = 0; i < players.length; ++i) {
-          const contract = MiniLotteryContractR(players[i])
+          const contract = HashLotteryContractR(players[i])
             const g = await contract[betFunc]({
                 value: betAmount
             })
@@ -59,10 +61,10 @@ describe("MiniLottery contract", function () {
     }
 
     const printData = async () => {
-        const gameData = await MiniLotteryContract.bet2Games("1")
+        const gameData = await HashLotteryContract.games("1")
         console.log("gameData: ", gameData);
         console.log("javascript winner spot: ", gameData[2])
-        const gameData2 = await MiniLotteryContract.bet2Games("2")
+        const gameData2 = await HashLotteryContract.games("2")
         console.log("gameData: ", gameData2);
         console.log("javascript winner spot: ", gameData2[2])
         console.log("owner balance", ethers.formatEther(await ethers.provider.getBalance(owner.address)))
@@ -73,12 +75,12 @@ describe("MiniLottery contract", function () {
     
     await printData()
 
-    const claimContract = MiniLotteryContractR(owner)
-    const res = await claimContract[getRecentGameIds](addr1, betAmount, 2, 2);
+    const claimContract = HashLotteryContractR(owner)
+    const res = await claimContract[getRecentGameIds](addr1, 2, 2);
 
     console.log("res: ", res)
 
-    const gamePlayers = await MiniLotteryContract.getPlayersPerGameId("1", ethers.parseEther("2"))
+    const gamePlayers = await claimContract.getPlayersPerGameId("1")
     console.log("players: ", gamePlayers)
 
     
