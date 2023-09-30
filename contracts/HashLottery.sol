@@ -9,8 +9,6 @@ import "../node_modules/@openzeppelin/contracts/access/AccessControl.sol";
 import "../node_modules/@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "../node_modules/@openzeppelin/contracts/security/Pausable.sol";
 
-import "hardhat/console.sol";
-
 /// @custom:security-contact james98099@gmail.com
 contract HashLottery is Ownable, AccessControl, Initializable, Pausable {
     bytes32 public constant SET_MANAGEMENT_ROLE = keccak256("SET_MANAGEMENT_ROLE");

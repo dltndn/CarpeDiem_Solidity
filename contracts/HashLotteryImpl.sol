@@ -54,10 +54,8 @@ contract HashLotteryImpl is HashLottery {
                     Counters.Counter storage currentGameIdStruct = _getGameIdStorage();
                     _gameData.players[i] = msg.sender;
                     _insertGameId(currentGameId);
-                    console.log("before gameId: %d", _getGameId());
                     emit Bet(currentGameId, msg.sender, i + 1);
                     currentGameIdStruct.increment();
-                    console.log("after gameId: %d", _getGameId());
                 } else {
                     _gameData.players[i] = msg.sender;
                     _insertGameId(_getGameId());
@@ -81,8 +79,6 @@ contract HashLotteryImpl is HashLottery {
         uint playerIndex = _bet(gameData);
         uint fee = msg.value.div(managementFee);
         developerWallet.transfer(fee);
-        console.log("Player %d joined Game %d", playerIndex, gameId);
-        console.log("Transfer to developer wallet %d", fee);
         return (playerIndex, msg.value);
     }
 
@@ -101,7 +97,6 @@ contract HashLotteryImpl is HashLottery {
     // 당첨금을 계산해주는 함수
     function getRewardAmount() internal view returns (uint) {
         uint fee = betAmount.div(managementFee).mul(playerAmount);
-        console.log("fee : %d", fee);
         return betAmount.sub(fee);
     }
 
@@ -125,7 +120,6 @@ contract HashLotteryImpl is HashLottery {
 
         for (uint i = 0; i < playerAmount; ++i) {
             result[i] = gameData.players[i];
-            console.log("Player %d seat on %d", result[i], i);
         }
         return result;
     }
