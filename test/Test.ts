@@ -48,9 +48,14 @@ describe("MiniLottery contract", function () {
 
     const players = [owner, addr1, addr2, addr3]
 
+    for (const val of players) {
+      const randomNum = Math.floor(Math.random() * 256);
+      await HashLotteryContract.connect(val).setBettingKey(randomNum)
+    }
+
     // fallback
 
-    for (let j = 0; j<5; ++j) {
+    for (let j = 0; j<2; ++j) {
         for (let i = 0; i < players.length; ++i) {
           const contract = HashLotteryContractR(players[i])
             const g = await contract[betFunc]({
@@ -60,31 +65,30 @@ describe("MiniLottery contract", function () {
         }
     }
 
-    const printData = async () => {
-        const gameData = await HashLotteryContract.games("1")
-        console.log("gameData: ", gameData);
-        console.log("javascript winner spot: ", gameData[2])
-        const gameData2 = await HashLotteryContract.games("2")
-        console.log("gameData: ", gameData2);
-        console.log("javascript winner spot: ", gameData2[2])
-        console.log("owner balance", ethers.formatEther(await ethers.provider.getBalance(owner.address)))
-        console.log("addr1 balance", ethers.formatEther(await ethers.provider.getBalance(addr1.address)))
-        console.log("addr2 balance", ethers.formatEther(await ethers.provider.getBalance(addr2.address)))
-        console.log("addr3 balance", ethers.formatEther(await ethers.provider.getBalance(addr3.address)))
-    }
+    // const printData = async () => {
+    //     const gameData = await HashLotteryContract.games("1")
+    //     console.log("gameData: ", gameData);
+    //     console.log("javascript winner spot: ", gameData[2])
+    //     const gameData2 = await HashLotteryContract.games("2")
+    //     console.log("gameData: ", gameData2);
+    //     console.log("javascript winner spot: ", gameData2[2])
+    //     console.log("owner balance", ethers.formatEther(await ethers.provider.getBalance(owner.address)))
+    //     console.log("addr1 balance", ethers.formatEther(await ethers.provider.getBalance(addr1.address)))
+    //     console.log("addr2 balance", ethers.formatEther(await ethers.provider.getBalance(addr2.address)))
+    //     console.log("addr3 balance", ethers.formatEther(await ethers.provider.getBalance(addr3.address)))
+    // }
     
-    await printData()
+    // await printData()
 
     const claimContract = HashLotteryContractR(owner)
-    const res = await claimContract[getRecentGameIds](addr1, 2, 2);
 
-    console.log("res: ", res)
+    // const gamePlayers = await claimContract.getPlayersPerGameId("1")
+    // console.log("players: ", gamePlayers)
 
-    const gamePlayers = await claimContract.getPlayersPerGameId("1")
-    console.log("players: ", gamePlayers)
-
-    
-
+    const gameInfo = await HashLotteryContract.games("1")
+    console.log("gameInfo: ", gameInfo)
+    const gameInfo2 = await HashLotteryContract.games("2")
+    console.log("gameInfo2: ", gameInfo2)
 
         // none fallback
     // for (let j = 0; j<3; ++j) {

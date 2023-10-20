@@ -9,7 +9,7 @@ import "../node_modules/@openzeppelin/contracts/access/AccessControl.sol";
 import "../node_modules/@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "../node_modules/@openzeppelin/contracts/security/Pausable.sol";
 
-/// @custom:security-contact james98099@gmail.com
+/// @custom:security-contact james9809@naver.com
 contract HashLottery is Ownable, AccessControl, Initializable, Pausable {
     bytes32 public constant SET_MANAGEMENT_ROLE = keccak256("SET_MANAGEMENT_ROLE");
     using SafeMath for uint256;
@@ -21,15 +21,14 @@ contract HashLottery is Ownable, AccessControl, Initializable, Pausable {
     address payable public developerWallet; // 수수료 수취 지갑 주소
     uint public managementFee; // 개발자 수수료(베팅금에서 차감) - ex) 100 -> 1%
 
-    event Bet(uint indexed gameId, address player, uint spot); // gameId, player, 배정받은 자리
-    event EnterFirstPlayer(uint indexed preGameId, uint targetBlockNumber, uint winnerSpot);
-    event ClaimReward(uint indexed gameId, address indexed player, uint value);
-    event ChangedManagement(address from);
+    event Bet(uint indexed gameId, address indexed player, uint indexed spot); // gameId, player, 배정받은 자리
+    event EnterLastPlayer(uint indexed gameId, bytes32 indexed resultHash, uint indexed winnerSpot);
+    event ClaimReward(uint indexed gameId, address indexed player, uint indexed value);
+    event ChangedManagement(address indexed from);
 
     // 게임 구조체
     struct Game {
-        uint targetBlockNumber;
-        bytes32 targetBlockhash;
+        bytes32 resultHash;
         uint winnerSpot;
         bool rewardClaimed;
         mapping(uint => address) players;
@@ -41,9 +40,13 @@ contract HashLottery is Ownable, AccessControl, Initializable, Pausable {
     // 게임 데이터
     mapping(uint => Game) public games;
 
+    // 유저 베팅 키
+    mapping(address => uint8) internal bettingKeys;
 
     // 유저 참가 게임id 내역
-    mapping(address => uint[]) public playerGameId;
+    // mapping(address => uint[]) public playerGameId;
+    // mapping(address => mapping(uint => bool)) public playerGameId;
+    // mapping(address => uint) public playerLastGameId;
 
     // constructor
     function initialize(address payable _developerWallet, uint _betAmount) public initializer {
@@ -99,5 +102,11 @@ contract HashLottery is Ownable, AccessControl, Initializable, Pausable {
     // 임시 중지 해제 함수
     function unpause() external onlyRole(SET_MANAGEMENT_ROLE) {
         _unpause();
+    }
+
+    // bettingKey 세팅 함수
+    function setBettingKey(uint8 _key) external {
+        require(_key != 0, 'BettingKey must bigger than 0.');
+        bettingKeys[msg.sender] = _key;
     }
 }
