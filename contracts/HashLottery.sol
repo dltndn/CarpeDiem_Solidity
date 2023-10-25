@@ -74,6 +74,18 @@ contract HashLottery is Ownable, AccessControl, Initializable, Pausable {
         }
     }
 
+    // 당첨 결과 계산 함수
+    function calculateWinningResults(address[4] memory _players) public view returns(bytes32, uint) {
+        bytes32 hashResult = keccak256(abi.encodePacked(
+            _players[0], bettingKeys[_players[0]],
+            _players[1], bettingKeys[_players[1]],
+            _players[2], bettingKeys[_players[2]],
+            _players[3], bettingKeys[_players[3]]
+            ));
+        uint winnerSpot = uint(hashResult).mod(4) + 1;
+        return (hashResult, winnerSpot);
+    }
+
     // 수행 컨트랙 주소 수정
     function setImplementation(address _newImple) external onlyRole(SET_MANAGEMENT_ROLE) {
         require(_newImple != address(0));

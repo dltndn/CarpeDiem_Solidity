@@ -45,13 +45,12 @@ contract HashLotteryImpl is HashLottery {
                     // 마지막 참가자 - 현재 게임 ID 1 증가
                     // 당첨자 기록 코드 수행
                     _gameData.players[i] = msg.sender;
-                    bytes32 hashValue = _hashPlayerAddress(getPlayersPerGameId(currentGameId));
+                    (bytes32 hashValue, uint _winnerSpot) = calculateWinningResults(getPlayersPerGameId(currentGameId));
                     _gameData.resultHash = hashValue;
-                    uint _winnerSpot = uint(hashValue).mod(4);
-                    _gameData.winnerSpot = _winnerSpot.add(1);
+                    _gameData.winnerSpot = _winnerSpot;
                     Counters.Counter storage currentGameIdStruct = _getGameIdStorage();
                     emit Bet(_currentGameId, msg.sender, i + 1);
-                    emit EnterLastPlayer(_currentGameId, hashValue, _winnerSpot.add(1));
+                    emit EnterLastPlayer(_currentGameId, hashValue, _winnerSpot);
                     currentGameIdStruct.increment();
                 } else {
                     _gameData.players[i] = msg.sender;
