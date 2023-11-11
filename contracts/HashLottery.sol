@@ -53,7 +53,7 @@ contract HashLottery is Ownable, AccessControl, Initializable, Pausable {
         gameCurrentId.increment();
         playerAmount = 4;
         betAmount = _betAmount;
-        managementFee = 100;
+        managementFee = 150;
         developerWallet = _developerWallet;
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(SET_MANAGEMENT_ROLE, msg.sender);
@@ -118,6 +118,7 @@ contract HashLottery is Ownable, AccessControl, Initializable, Pausable {
 
     // bettingKey 세팅 함수
     function setBettingKey(uint8 _key) external {
+        require(bettingKeys[msg.sender] == 0, 'BettingKey already had set.');
         require(_key != 0, 'BettingKey must bigger than 0.');
         bettingKeys[msg.sender] = _key;
     }

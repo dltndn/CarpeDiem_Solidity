@@ -28,7 +28,7 @@ contract HashLotteryImpl is HashLottery {
 
     // 지갑 주소들의 hash값 반환
     function _hashPlayerAddress(address[4] memory _players) internal view returns (bytes32) {
-        return(keccak256(abi.encodePacked(
+        return(ripemd160(abi.encodePacked(
             _players[0], bettingKeys[_players[0]],
             _players[1], bettingKeys[_players[1]],
             _players[2], bettingKeys[_players[2]],
