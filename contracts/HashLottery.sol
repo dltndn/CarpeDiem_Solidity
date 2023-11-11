@@ -22,13 +22,13 @@ contract HashLottery is Ownable, AccessControl, Initializable, Pausable {
     uint public managementFee; // 개발자 수수료(베팅금에서 차감) - ex) 100 -> 1%
 
     event Bet(uint indexed gameId, address indexed player, uint indexed spot); // gameId, player, 배정받은 자리
-    event EnterLastPlayer(uint indexed gameId, bytes32 indexed resultHash, uint indexed winnerSpot);
+    event EnterLastPlayer(uint indexed gameId, bytes20 indexed resultHash, uint indexed winnerSpot);
     event ClaimReward(uint indexed gameId, address indexed player, uint indexed value);
     event ChangedManagement(address indexed from);
 
     // 게임 구조체
     struct Game {
-        bytes32 resultHash;
+        bytes20 resultHash;
         uint winnerSpot;
         bool rewardClaimed;
         mapping(uint => address) players;
@@ -75,14 +75,14 @@ contract HashLottery is Ownable, AccessControl, Initializable, Pausable {
     }
 
     // 당첨 결과 계산 함수
-    function calculateWinningResults(address[4] memory _players) public view returns(bytes32, uint) {
-        bytes32 hashResult = keccak256(abi.encodePacked(
+    function calculateWinningResults(address[4] memory _players) public view returns(bytes20, uint) {
+        bytes20 hashResult = ripemd160(abi.encodePacked(
             _players[0], bettingKeys[_players[0]],
             _players[1], bettingKeys[_players[1]],
             _players[2], bettingKeys[_players[2]],
             _players[3], bettingKeys[_players[3]]
             ));
-        uint winnerSpot = uint(hashResult).mod(4) + 1;
+        uint winnerSpot = uint(bytes32(hashResult)).mod(4) + 1;
         return (hashResult, winnerSpot);
     }
 
