@@ -91,7 +91,7 @@ contract HashLotteryImpl is HashLottery {
     }
 
     // 당첨금을 계산해주는 함수
-    function getRewardAmount() internal view returns (uint) {
+    function getRewardAmount() public view returns (uint) {
         uint fee = betAmount.div(managementFee);
         return betAmount.sub(fee).mul(playerAmount);
     }
@@ -102,8 +102,8 @@ contract HashLotteryImpl is HashLottery {
         Game storage game = isWinner(msg.sender, _gameId);
         // 당첨금 계산
         uint reward = getRewardAmount();
-        payable(msg.sender).transfer(reward);
         game.rewardClaimed = true;
+        payable(msg.sender).transfer(reward);
         emit ClaimReward(_gameId, msg.sender, reward);
         return (_gameId, reward);
     }

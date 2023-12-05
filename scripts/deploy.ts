@@ -14,11 +14,11 @@ async function main() {
   // deploy contract e
 
   // execute deployed contract s
-  const players = await ethers.getSigners();
-  const betAmount = ethers.parseEther("0.001"); // 2 ETH
+  // const players = await ethers.getSigners();
+  // const betAmount = ethers.parseEther("0.001"); // 2 ETH
 
   const Lottery = await ethers.getContractFactory("HashLotteryImpl");
-  const lottery = Lottery.attach("0xa37D79B2E9E55046b0CA2e602A13835AD60758F4")
+  const lottery = Lottery.attach("0x36a99388ee9AB8c9b6DbDFf12A46926baBC1F0d1")
   
   // const res = await lottery.getPlayersPerGameId("7")
   // const res = await lottery.developerWallet()
@@ -28,10 +28,14 @@ async function main() {
   //@ts-ignore
   // await lottery.initialize("0xB6C9011d74B1149fdc269530d51b4A594D97Fd04", ethers.parseEther("0.001"))
   //@ts-ignore
-  // await lottery.setImplementation("0xd62D4Cee00953e765fF3fb630cABaeDFDB4EAC4B")
+  // await lottery.setImplementation("0x09270CDC4D6C9aD037aE2E88478F8BdC6bc1563b")
   // const result = await lottery.getPlayersPerGameId(13)
-  const result = await lottery.connect(players[1]).claimReward(12)
-  console.log(result)
+
+  // const result = await lottery.connect(players[1]).claimReward(12)
+  // console.log(result)
+
+  // const currentGameId = await lottery.gameCurrentId()
+  //   console.log("currentGameId: ", currentGameId)
 
   
   // for (let i=1; i<players.length; ++i) {
