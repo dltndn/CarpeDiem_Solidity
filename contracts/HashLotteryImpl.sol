@@ -27,7 +27,7 @@ contract HashLotteryImpl is HashLottery {
     }
 
     // 지갑 주소들의 hash값 반환
-    // function _hashPlayerAddress(address[4] memory _players) internal view returns (bytes20) {
+    // function _hashPlayerAddress(address[4] memory _players) internal view returns (bytes32) {
     //     return(ripemd160(abi.encodePacked(
     //         _players[0], bettingKeys[_players[0]],
     //         _players[1], bettingKeys[_players[1]],
@@ -45,7 +45,7 @@ contract HashLotteryImpl is HashLottery {
                     // 마지막 참가자 - 현재 게임 ID 1 증가
                     // 당첨자 기록 코드 수행
                     _gameData.players[i] = msg.sender;
-                    (bytes20 hashValue, uint _winnerSpot) = calculateWinningResults(getPlayersPerGameId(currentGameId));
+                    (bytes32 hashValue, uint _winnerSpot) = calculateWinningResults(getPlayersPerGameId(currentGameId));
                     _gameData.resultHash = hashValue;
                     _gameData.winnerSpot = _winnerSpot;
                     Counters.Counter storage currentGameIdStruct = _getGameIdStorage();

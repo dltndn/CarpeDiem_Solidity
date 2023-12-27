@@ -22,10 +22,13 @@ describe("MiniLottery contract", function () {
       deployConractFixture
     );
 
-    const betAmount = ethers.parseEther("2"); // 2 ETH
+    const betAmount = ethers.parseEther("0.07"); // 2 ETH
 
-    await HashLotteryContract.initialize(owner, betAmount)
+    await HashLotteryContract.initialize(owner, betAmount, 150)
     await HashLotteryContract.setImplementation(HashiLotteryImplContract.target)
+
+    const result = await HashLotteryContract.calculateWinningResults([owner.address, addr1.address, addr2.address, addr3.address])
+    console.log(result)
 
     const betFunc = 'bet()'
     const claimFunc = 'claimReward(uint256)'
@@ -55,14 +58,19 @@ describe("MiniLottery contract", function () {
 
     // fallback
 
-    for (let j = 0; j<2; ++j) {
-        for (let i = 0; i < players.length; ++i) {
-          const contract = HashLotteryContractR(players[i])
-            const g = await contract[betFunc]({
-                value: betAmount
-            })
-            console.log("gasPrice: ", g.gasPrice)
-        }
+    for (let i = 0; i < players.length; ++i) {
+      const contract = HashLotteryContractR(players[i])
+        const g = await contract[betFunc]({
+            value: betAmount
+        })
+        console.log("gasPrice: ", g.gasPrice)
+    }
+    for (let i = players.length-1; i >= 0; --i) {
+      const contract = HashLotteryContractR(players[i])
+        const g = await contract[betFunc]({
+            value: betAmount
+        })
+        console.log("gasPrice: ", g.gasPrice)
     }
 
     // const printData = async () => {
